@@ -26,7 +26,12 @@ router
 router
   .route('/:id')
   .get(getProductById)
-  .put(verifyJWT, authorizeRoles(USER_ROLES.ADMIN), updateProduct)
+  .put(
+    verifyJWT,
+    authorizeRoles(USER_ROLES.ADMIN),
+    upload.array('images', 5),
+    updateProduct,
+  )
   .delete(verifyJWT, authorizeRoles(USER_ROLES.ADMIN), deleteProduct);
 
 export default router;

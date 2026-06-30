@@ -1,4 +1,4 @@
-import { uploadOnCloudinary } from '../utils/cloudinary';
+import { uploadOnCloudinary, deleteFromCloudinary } from '../utils/cloudinary';
 import { Express } from 'express';
 import { Request, Response } from 'express';
 import Product from '../models/Product.model';
@@ -217,35 +217,60 @@ export const updateProduct = asyncHandler(
       sku,
       brand,
       category,
-      images,
       isFeatured,
       isPublished,
     } = req.body;
 
-    const product = await Product.findByIdAndUpdate(
-      id,
-      {
-        name,
-        description,
-        price,
-        discountPrice,
-        stock,
-        sku,
-        brand,
-        category,
-        images,
-        isFeatured,
-        isPublished,
-      },
-      {
-        returnDocument: 'after',
-        runValidators: true,
-      },
-    );
+    const product = await Product.findById(id);
 
     if (!product) {
       throw new ApiError(404, 'Product not found');
     }
+
+    if (category) {
+      const categoryExists = await Category.findById(category);
+
+      if (!categoryExists) {
+        throw new ApiError(404, 'Category not found');
+      }
+    }
+
+    const files = (req.files as Express.Multer.File[]) || [];
+
+    let uploadedImages = product.images;
+
+    if (files.length > 0) {
+      for (const image of product.images) {
+        await deleteFromCloudinary(image.url);
+      }
+
+      uploadedImages = [];
+
+      for (const file of files) {
+        const result = await uploadOnCloudinary(file.path);
+
+        if (result) {
+          uploadedImages.push({
+            url: result.secure_url,
+            alt: file.originalname,
+          });
+        }
+      }
+    }
+
+    product.name = name ?? product.name;
+    product.description = description ?? product.description;
+    product.price = price ?? product.price;
+    product.discountPrice = discountPrice ?? product.discountPrice;
+    product.stock = stock ?? product.stock;
+    product.sku = sku ?? product.sku;
+    product.brand = brand ?? product.brand;
+    product.category = category ?? product.category;
+    product.images = uploadedImages;
+    product.isFeatured = isFeatured ?? product.isFeatured;
+    product.isPublished = isPublished ?? product.isPublished;
+
+    await product.save();
 
     return res
       .status(200)
