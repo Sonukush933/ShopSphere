@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Product from '../models/Product.model';
+import Category from '../models/Category.model';
 import asyncHandler from '../utils/asyncHandler';
 import ApiError from '../utils/ApiError';
 import ApiResponse from '../utils/ApiResponse';
@@ -22,6 +23,12 @@ export const createProduct = asyncHandler(
 
     if (!name || !description || !price || !stock || !brand || !category) {
       throw new ApiError(400, 'All required fields are required');
+    }
+
+    const categoryExists = await Category.findById(category);
+
+    if (!categoryExists) {
+      throw new ApiError(404, 'Category not found');
     }
 
     const product = await Product.create({
@@ -47,7 +54,9 @@ export const createProduct = asyncHandler(
 
 export const getAllProducts = asyncHandler(
   async (req: Request, res: Response) => {
-    const products = await Product.find();
+    const products = await Product.find()
+      .populate('category', 'name slug')
+      .populate('createdBy', 'name email');
 
     return res
       .status(200)
@@ -58,7 +67,9 @@ export const getAllProducts = asyncHandler(
 export const getProductById = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const product = await Product.findById(id);
+ const product = await Product.findById(id)
+  .populate("category", "name slug")
+  .populate("createdBy", "name email");
 
     if (!product) {
       throw new ApiError(404, 'Product not found');
