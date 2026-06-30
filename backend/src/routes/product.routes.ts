@@ -9,12 +9,18 @@ import {
 import { verifyJWT } from '../middleware/auth.middleware';
 import { authorizeRoles } from '../middleware/role.middleware';
 import { USER_ROLES } from '../constants';
+import upload from '../middleware/multer.middleware';
 
 const router = Router();
 
 router
   .route('/')
-  .post(verifyJWT, authorizeRoles(USER_ROLES.ADMIN), createProduct)
+  .post(
+    verifyJWT,
+    authorizeRoles(USER_ROLES.ADMIN),
+    upload.array('images', 5),
+    createProduct,
+  )
   .get(getAllProducts);
 
 router

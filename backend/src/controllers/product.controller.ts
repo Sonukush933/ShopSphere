@@ -1,3 +1,5 @@
+import { uploadOnCloudinary } from '../utils/cloudinary';
+import { Express } from 'express';
 import { Request, Response } from 'express';
 import Product from '../models/Product.model';
 import Category from '../models/Category.model';
@@ -16,7 +18,6 @@ export const createProduct = asyncHandler(
       sku,
       brand,
       category,
-      images,
       isFeatured,
       isPublished,
     } = req.body;
@@ -31,6 +32,25 @@ export const createProduct = asyncHandler(
       throw new ApiError(404, 'Category not found');
     }
 
+    const files = (req.files as Express.Multer.File[]) || [];
+
+    const uploadedImages: { url: string; alt: string }[] = [];
+
+    for (const file of files) {
+      const result = await uploadOnCloudinary(file.path);
+
+      if (result) {
+        uploadedImages.push({
+          url: result.secure_url,
+          alt: file.originalname,
+        });
+      }
+    }
+
+    if (uploadedImages.length === 0) {
+      throw new ApiError(400, 'Please upload at least one product image');
+    }
+
     const product = await Product.create({
       name,
       description,
@@ -40,7 +60,7 @@ export const createProduct = asyncHandler(
       sku,
       brand,
       category,
-      images,
+      images: uploadedImages,
       isFeatured,
       isPublished,
       createdBy: req.user?._id,
