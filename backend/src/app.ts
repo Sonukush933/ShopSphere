@@ -7,6 +7,7 @@ import categoryRoutes from './routes/category.routes'
 import cartRoutes from "./routes/cart.routes";
 import addressRoutes from "./routes/address.routes";
 import orderRoutes from "./routes/order.routes";
+import wishlistRoutes from "./routes/wishlist.routes";
 
 const app = express();
 app.use(express.json());
@@ -25,6 +26,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/addresses", addressRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/wishlist", wishlistRoutes);
 
 
 app.use(errorMiddleware);
