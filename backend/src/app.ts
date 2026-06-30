@@ -5,6 +5,7 @@ import productRoutes from "./routes/product.routes";
 import errorMiddleware from './middleware/error.middleware';
 import categoryRoutes from './routes/category.routes'
 import cartRoutes from "./routes/cart.routes";
+import addressRoutes from "./routes/address.routes";
 
 const app = express();
 app.use(express.json());
@@ -21,6 +22,7 @@ app.use('/api/auth', authRoutes);
 app.use("/api/products", productRoutes)
 app.use("/api/categories", categoryRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/addresses", addressRoutes);
 
 
 app.use(errorMiddleware);
