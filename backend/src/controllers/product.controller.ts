@@ -54,22 +54,125 @@ export const createProduct = asyncHandler(
 
 export const getAllProducts = asyncHandler(
   async (req: Request, res: Response) => {
-    const products = await Product.find()
+    const {
+      search,
+      category,
+      minPrice,
+      maxPrice,
+      rating,
+      inStock,
+      featured,
+      sort,
+      page = '1',
+      limit = '10',
+    } = req.query;
+
+    const filter: any = {};
+
+    // Search
+    if (search) {
+      filter.name = {
+        $regex: search,
+        $options: 'i',
+      };
+    }
+
+    // Category
+    if (category) {
+      filter.category = category;
+    }
+
+    // Price Filter
+    if (minPrice || maxPrice) {
+      filter.price = {};
+
+      if (minPrice) {
+        filter.price.$gte = Number(minPrice);
+      }
+
+      if (maxPrice) {
+        filter.price.$lte = Number(maxPrice);
+      }
+    }
+
+    // Rating Filter
+    if (rating) {
+      filter.ratings = {
+        $gte: Number(rating),
+      };
+    }
+
+    // Stock Filter
+    if (inStock === 'true') {
+      filter.stock = {
+        $gt: 0,
+      };
+    }
+
+    // Featured Products
+    if (featured === 'true') {
+      filter.isFeatured = true;
+    }
+
+    let query = Product.find(filter)
       .populate('category', 'name slug')
       .populate('createdBy', 'name email');
 
-    return res
-      .status(200)
-      .json(new ApiResponse(200, products, 'Products fetched successfully'));
+    // Sorting
+    switch (sort) {
+      case 'price_asc':
+        query = query.sort({ price: 1 });
+        break;
+
+      case 'price_desc':
+        query = query.sort({ price: -1 });
+        break;
+
+      case 'latest':
+        query = query.sort({ createdAt: -1 });
+        break;
+
+      case 'rating':
+        query = query.sort({ ratings: -1 });
+        break;
+
+      default:
+        query = query.sort({ createdAt: -1 });
+    }
+
+    const currentPage = Number(page);
+    const perPage = Number(limit);
+
+    const totalProducts = await Product.countDocuments(filter);
+
+    const products = await query
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          products,
+          pagination: {
+            totalProducts,
+            currentPage,
+            totalPages: Math.ceil(totalProducts / perPage),
+            limit: perPage,
+          },
+        },
+        'Products fetched successfully',
+      ),
+    );
   },
 );
 
 export const getProductById = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
- const product = await Product.findById(id)
-  .populate("category", "name slug")
-  .populate("createdBy", "name email");
+    const product = await Product.findById(id)
+      .populate('category', 'name slug')
+      .populate('createdBy', 'name email');
 
     if (!product) {
       throw new ApiError(404, 'Product not found');
