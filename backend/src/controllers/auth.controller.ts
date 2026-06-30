@@ -94,7 +94,7 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
       },
     },
     {
-      new: true,
+      returnDocument: "after"
     },
   );
 
