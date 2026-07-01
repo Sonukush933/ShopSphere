@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IOrder extends Document {
   user: mongoose.Types.ObjectId;
@@ -13,17 +13,15 @@ export interface IOrder extends Document {
 
   totalAmount: number;
 
-  orderStatus:
-    | "Pending"
-    | "Confirmed"
-    | "Shipped"
-    | "Delivered"
-    | "Cancelled";
+  coupon?: mongoose.Types.ObjectId;
 
-  paymentStatus:
-    | "Pending"
-    | "Paid"
-    | "Failed";
+  discountAmount: number;
+
+  finalAmount: number;
+
+  orderStatus: 'Pending' | 'Confirmed' | 'Shipped' | 'Delivered' | 'Cancelled';
+
+  paymentStatus: 'Pending' | 'Paid' | 'Failed';
 
   paymentMethod: string;
 }
@@ -32,7 +30,7 @@ const orderSchema = new Schema<IOrder>(
   {
     user: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
 
@@ -40,7 +38,7 @@ const orderSchema = new Schema<IOrder>(
       {
         product: {
           type: Schema.Types.ObjectId,
-          ref: "Product",
+          ref: 'Product',
           required: true,
         },
 
@@ -60,7 +58,7 @@ const orderSchema = new Schema<IOrder>(
 
     shippingAddress: {
       type: Schema.Types.ObjectId,
-      ref: "Address",
+      ref: 'Address',
       required: true,
     },
 
@@ -69,42 +67,43 @@ const orderSchema = new Schema<IOrder>(
       required: true,
       min: 0,
     },
-
+    coupon: {
+      type: Schema.Types.ObjectId,
+      ref: 'Coupon',
+      default: null,
+    },
+    discountAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    finalAmount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
     orderStatus: {
       type: String,
-      enum: [
-        "Pending",
-        "Confirmed",
-        "Shipped",
-        "Delivered",
-        "Cancelled",
-      ],
-      default: "Pending",
+      enum: ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'],
+      default: 'Pending',
     },
 
     paymentStatus: {
       type: String,
-      enum: [
-        "Pending",
-        "Paid",
-        "Failed",
-      ],
-      default: "Pending",
+      enum: ['Pending', 'Paid', 'Failed'],
+      default: 'Pending',
     },
 
     paymentMethod: {
       type: String,
-      default: "COD",
+      default: 'COD',
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-const Order = mongoose.model<IOrder>(
-  "Order",
-  orderSchema
-);
+const Order = mongoose.model<IOrder>('Order', orderSchema);
 
 export default Order;
