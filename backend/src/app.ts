@@ -10,6 +10,8 @@ import orderRoutes from "./routes/order.routes";
 import wishlistRoutes from "./routes/wishlist.routes";
 import reviewRoutes from "./routes/review.routes";
 import couponRoutes from './routes/coupon.routes';
+import paymentRoutes from './routes/payment.routes';
+
 
 const app = express();
 app.use(express.json());
@@ -31,6 +33,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use('/api/coupons', couponRoutes);
+app.use('/api/payments', paymentRoutes);
 
 
 app.use(errorMiddleware);
