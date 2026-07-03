@@ -15,6 +15,12 @@ export interface IPayment extends Document {
 
   transactionId?: string;
 
+  razorpayOrderId?: string;
+
+  razorpayPaymentId?: string;
+
+  razorpaySignature?: string;
+
   paidAt?: Date;
 }
 
@@ -58,12 +64,22 @@ const paymentSchema = new Schema<IPayment>(
 
     transactionId: {
       type: String,
-      default: null,
+    },
+
+    razorpayOrderId: {
+      type: String,
+    },
+
+    razorpayPaymentId: {
+      type: String,
+    },
+
+    razorpaySignature: {
+      type: String,
     },
 
     paidAt: {
       type: Date,
-      default: null,
     },
   },
   {
@@ -71,9 +87,6 @@ const paymentSchema = new Schema<IPayment>(
   },
 );
 
-const Payment = mongoose.model<IPayment>(
-  'Payment',
-  paymentSchema,
-);
+const Payment = mongoose.model<IPayment>('Payment', paymentSchema);
 
 export default Payment;

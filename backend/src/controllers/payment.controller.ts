@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+import razorpay from '../config/razorpay';
 import { Request, Response } from 'express';
 import Payment from '../models/payment.model';
 import Order from '../models/order.model';
@@ -45,6 +47,103 @@ export const createPayment = asyncHandler(
     return res
       .status(201)
       .json(new ApiResponse(201, payment, 'Payment created successfully'));
+  },
+);
+
+export const createRazorpayOrder = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { orderId } = req.body;
+
+    if (!orderId) {
+      throw new ApiError(400, 'Order ID is required');
+    }
+
+    const order = await Order.findOne({
+      _id: orderId,
+      user: req.user?._id,
+    });
+
+    if (!order) {
+      throw new ApiError(404, 'Order not found');
+    }
+
+    const razorpayOrder = await razorpay.orders.create({
+      amount: order.finalAmount * 100,
+      currency: 'INR',
+      receipt: order._id.toString(),
+    });
+
+    const payment = await Payment.findOne({
+      order: order._id,
+    });
+
+    if (!payment) {
+      throw new ApiError(404, 'Payment not found');
+    }
+
+    payment.razorpayOrderId = razorpayOrder.id;
+
+    await payment.save();
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          razorpayOrder,
+          'Razorpay order created successfully',
+        ),
+      );
+  },
+);
+
+export const verifyRazorpayPayment = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      req.body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      throw new ApiError(400, 'All Razorpay payment details are required');
+    }
+
+    const body = razorpay_order_id + '|' + razorpay_payment_id;
+
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
+      .update(body)
+      .digest('hex');
+
+    if (expectedSignature !== razorpay_signature) {
+      throw new ApiError(400, 'Invalid payment signature');
+    }
+
+    const payment = await Payment.findOne({
+      razorpayOrderId: razorpay_order_id,
+    });
+
+    if (!payment) {
+      throw new ApiError(404, 'Payment not found');
+    }
+
+    payment.paymentStatus = 'Success';
+    payment.paymentGateway = 'RAZORPAY';
+    payment.transactionId = razorpay_payment_id;
+
+    payment.razorpayPaymentId = razorpay_payment_id;
+    payment.razorpaySignature = razorpay_signature;
+
+    payment.paidAt = new Date();
+
+    await payment.save();
+
+    await Order.findByIdAndUpdate(payment.order, {
+      paymentStatus: 'Paid',
+      orderStatus: 'Confirmed',
+    });
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, 'Payment verified successfully'));
   },
 );
 

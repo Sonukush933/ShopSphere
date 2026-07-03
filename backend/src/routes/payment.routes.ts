@@ -3,12 +3,13 @@ import { Router } from 'express';
 import { verifyJWT } from '../middleware/auth.middleware';
 import { authorizeRoles } from '../middleware/role.middleware';
 import { USER_ROLES } from '../constants';
-
 import {
   createPayment,
   getMyPayments,
   getPaymentById,
-  updatePaymentStatus
+  updatePaymentStatus,
+  createRazorpayOrder,
+  verifyRazorpayPayment,
 } from '../controllers/payment.controller';
 
 const router = Router();
@@ -18,6 +19,19 @@ router.post(
   verifyJWT,
   authorizeRoles(USER_ROLES.CUSTOMER),
   createPayment,
+);
+router.post(
+  '/create-order',
+  verifyJWT,
+  authorizeRoles(USER_ROLES.CUSTOMER),
+  createRazorpayOrder,
+);
+
+router.post(
+  '/verify',
+  verifyJWT,
+  authorizeRoles(USER_ROLES.CUSTOMER),
+  verifyRazorpayPayment,
 );
 
 router.get(
@@ -37,7 +51,7 @@ router.get(
 router.patch(
   '/:id/status',
   verifyJWT,
-  authorizeRoles(USER_ROLES.CUSTOMER),
+  authorizeRoles(USER_ROLES.ADMIN),
   updatePaymentStatus,
 );
 
