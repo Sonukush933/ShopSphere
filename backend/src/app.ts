@@ -11,6 +11,7 @@ import wishlistRoutes from "./routes/wishlist.routes";
 import reviewRoutes from "./routes/review.routes";
 import couponRoutes from './routes/coupon.routes';
 import paymentRoutes from './routes/payment.routes';
+import dashboardRoutes from './routes/dashboard.routes';
 
 
 const app = express();
@@ -34,6 +35,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 
 app.use(errorMiddleware);
