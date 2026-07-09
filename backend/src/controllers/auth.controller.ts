@@ -21,7 +21,7 @@ export const registerUser = asyncHandler(
       password,
     });
 
-    const createdUser = await User.findById(user._id).select('-password');
+    const createdUser = await User.findById(user._id).select('-password -refreshToken');
 
     try {
       await sendEmail({
