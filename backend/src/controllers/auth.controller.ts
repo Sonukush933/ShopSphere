@@ -1,3 +1,5 @@
+import { sendEmail } from '../emails/services/email.service';
+import welcomeTemplate from '../emails/templates/welcome.template';
 import { Request, Response } from 'express';
 import asyncHandler from '../utils/asyncHandler';
 import ApiError from '../utils/ApiError';
@@ -20,6 +22,17 @@ export const registerUser = asyncHandler(
     });
 
     const createdUser = await User.findById(user._id).select('-password');
+
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: 'Welcome to ShopSphere 🎉',
+        html: welcomeTemplate(user.name),
+      });
+    } catch (error) {
+      console.error('Failed to send welcome email:', error);
+    }
+
     return res
       .status(201)
       .json(new ApiResponse(201, createdUser, 'User registered successfully'));
@@ -94,7 +107,7 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
       },
     },
     {
-      returnDocument: "after"
+      returnDocument: 'after',
     },
   );
 
@@ -104,14 +117,8 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
     sameSite: 'lax' as const,
   };
   return res
-  .status(200)
-  .clearCookie("accessToken", cookieOptions)
-  .clearCookie("refreshToken", cookieOptions)
-  .json(
-    new ApiResponse(
-      200,
-      {},
-      "Logout successful"
-    )
-  );
+    .status(200)
+    .clearCookie('accessToken', cookieOptions)
+    .clearCookie('refreshToken', cookieOptions)
+    .json(new ApiResponse(200, {}, 'Logout successful'));
 });
