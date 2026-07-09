@@ -1,5 +1,6 @@
 import { ErrorRequestHandler } from "express";
 import ApiError from "../utils/ApiError";
+import logger from '../logs/logger';
 
 const errorMiddleware: ErrorRequestHandler = (err, req, res, next) => {
   if (err instanceof ApiError) {
@@ -11,12 +12,12 @@ const errorMiddleware: ErrorRequestHandler = (err, req, res, next) => {
     });
   }
 
-  console.log(err);
+logger.error(err.stack || err.message);
 
-  return res.status(500).json({
-    success: false,
-    message: "Internal Server Error",
-  });
+return res.status(500).json({
+  success: false,
+  message: "Internal Server Error",
+});
 }
 
 export default errorMiddleware;

@@ -1,21 +1,26 @@
 import express from 'express';
-import cookieParser from "cookie-parser";
-import authRoutes from './routes/auth.routes';
-import productRoutes from "./routes/product.routes";
+import cookieParser from 'cookie-parser';
+import { applySecurityMiddleware } from './middleware/security.middleware';
 import errorMiddleware from './middleware/error.middleware';
-import categoryRoutes from './routes/category.routes'
-import cartRoutes from "./routes/cart.routes";
-import addressRoutes from "./routes/address.routes";
-import orderRoutes from "./routes/order.routes";
-import wishlistRoutes from "./routes/wishlist.routes";
-import reviewRoutes from "./routes/review.routes";
+import { requestLogger } from './middleware/logger.middleware';
+import { swaggerUi, swaggerSpec } from './config/swagger';
+import authRoutes from './routes/auth.routes';
+import productRoutes from './routes/product.routes';
+import categoryRoutes from './routes/category.routes';
+import cartRoutes from './routes/cart.routes';
+import addressRoutes from './routes/address.routes';
+import orderRoutes from './routes/order.routes';
+import wishlistRoutes from './routes/wishlist.routes';
+import reviewRoutes from './routes/review.routes';
 import couponRoutes from './routes/coupon.routes';
 import paymentRoutes from './routes/payment.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 
-
 const app = express();
+applySecurityMiddleware(app);
+app.use(requestLogger);
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.get('/', (req, res) => {
@@ -25,18 +30,18 @@ app.get('/', (req, res) => {
   });
 });
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/auth', authRoutes);
-app.use("/api/products", productRoutes)
-app.use("/api/categories", categoryRoutes);
-app.use("/api/cart", cartRoutes);
-app.use("/api/addresses", addressRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/wishlist", wishlistRoutes);
-app.use("/api/reviews", reviewRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/addresses', addressRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/reviews', reviewRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-
 
 app.use(errorMiddleware);
 export default app;
