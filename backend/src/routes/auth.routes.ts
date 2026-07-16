@@ -1,4 +1,6 @@
 import { verifyJWT } from '../middleware/auth.middleware';
+import { validateRequest } from '../middleware/validate.middleware';
+import { registerSchema, loginSchema } from '../schemas/auth.schema';
 import { Router } from 'express';
 import {
   getCurrentUser,
@@ -26,7 +28,13 @@ const router = Router();
  *       201:
  *         description: User registered successfully
  */
-router.post('/register', registerUser);
+router.post(
+  '/register',
+
+  validateRequest(registerSchema),
+
+  registerUser,
+);
 
 /**
  * @swagger
@@ -47,7 +55,13 @@ router.post('/register', registerUser);
  *       401:
  *         description: Invalid credentials
  */
-router.post('/login', loginUser);
+router.post(
+  '/login',
+
+  validateRequest(loginSchema),
+
+  loginUser,
+);
 
 /**
  * @swagger
