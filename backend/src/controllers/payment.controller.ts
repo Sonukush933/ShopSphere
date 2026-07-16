@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import razorpay from '../config/razorpay';
+import { getRazorpayInstance } from "../config/razorpay";
 import { Request, Response } from 'express';
 import Payment from '../models/payment.model';
 import Order from '../models/order.model';
@@ -66,6 +66,7 @@ export const createRazorpayOrder = asyncHandler(
     if (!order) {
       throw new ApiError(404, 'Order not found');
     }
+    const razorpay = getRazorpayInstance();
 
     const razorpayOrder = await razorpay.orders.create({
       amount: order.finalAmount * 100,
