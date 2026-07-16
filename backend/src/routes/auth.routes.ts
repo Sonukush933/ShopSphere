@@ -1,5 +1,5 @@
 import { verifyJWT } from '../middleware/auth.middleware';
-import { validateRequest } from '../middleware/validate.middleware';
+import { validate } from "../middleware/validate.middleware";
 import { registerSchema, loginSchema } from '../schemas/auth.schema';
 import { Router } from 'express';
 import {
@@ -29,11 +29,17 @@ const router = Router();
  *         description: User registered successfully
  */
 router.post(
-  '/register',
 
-  validateRequest(registerSchema),
+  "/register",
 
-  registerUser,
+  validate({
+
+    body: registerSchema,
+
+  }),
+
+  registerUser
+
 );
 
 /**
@@ -56,11 +62,17 @@ router.post(
  *         description: Invalid credentials
  */
 router.post(
-  '/login',
 
-  validateRequest(loginSchema),
+  "/login",
 
-  loginUser,
+  validate({
+
+    body: loginSchema,
+
+  }),
+
+  loginUser
+
 );
 
 /**

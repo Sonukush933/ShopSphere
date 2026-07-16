@@ -8,11 +8,11 @@ jest.mock('../../src/emails/services/email.service', () => ({
 describe('Authentication API', () => {
   const agent = request.agent(app);
 
-  const user = {
-    name: 'Sonu',
-    email: 'sonu@test.com',
-    password: 'Password123',
-  };
+const user = {
+  name: "Sonu",
+  email: "sonu@test.com",
+  password: "Password@123",
+};
 
   it('should register a new user', async () => {
     const response = await agent.post('/api/auth/register').send(user);
