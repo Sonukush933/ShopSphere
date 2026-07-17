@@ -1,14 +1,14 @@
-import { sendEmail } from '../emails/services/email.service';
-import welcomeTemplate from '../emails/templates/welcome.template';
 import { Request, Response } from 'express';
 import asyncHandler from '../utils/asyncHandler';
 import ApiError from '../utils/ApiError';
 import ApiResponse from '../utils/ApiResponse';
 import User from '../models/User.model';
+import { addWelcomeEmailJob } from '../jobs/email.job';
 
 export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
     const { name, email, password } = req.body;
+
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -21,16 +21,18 @@ export const registerUser = asyncHandler(
       password,
     });
 
-    const createdUser = await User.findById(user._id).select('-password -refreshToken');
+    const createdUser = await User.findById(user._id).select(
+      '-password -refreshToken',
+    );
 
+    // Add Welcome Email Job to BullMQ
     try {
-      await sendEmail({
-        to: user.email,
-        subject: 'Welcome to ShopSphere 🎉',
-        html: welcomeTemplate(user.name),
+      await addWelcomeEmailJob({
+        name: user.name,
+        email: user.email,
       });
     } catch (error) {
-      console.error('Failed to send welcome email:', error);
+      console.error('❌ Failed to queue welcome email:', error);
     }
 
     return res
@@ -47,11 +49,13 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const user = await User.findOne({ email });
+
   if (!user) {
     throw new ApiError(401, 'Invalid email or password');
   }
 
   const isPasswordCorrect = await user.comparePassword(password);
+
   if (!isPasswordCorrect) {
     throw new ApiError(401, 'Invalid email or password');
   }
@@ -60,7 +64,10 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   const refreshToken = user.generateRefreshToken();
 
   user.refreshToken = refreshToken;
-  await user.save({ validateBeforeSave: false });
+
+  await user.save({
+    validateBeforeSave: false,
+  });
 
   const loggedInUser = await User.findById(user._id).select(
     '-password -refreshToken',
@@ -116,6 +123,7 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
     secure: false,
     sameSite: 'lax' as const,
   };
+
   return res
     .status(200)
     .clearCookie('accessToken', cookieOptions)

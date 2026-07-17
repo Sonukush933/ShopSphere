@@ -1,8 +1,9 @@
-import "dotenv/config";
+import 'dotenv/config';
 
-import app from "./app";
-import connectDB from "./config/database";
-import { connectRedis } from "./config/redis";
+import app from './app';
+import connectDB from './config/database';
+import { connectRedis } from './config/redis';
+import './workers/email.worker';
 
 const PORT = process.env.PORT || 5000;
 
