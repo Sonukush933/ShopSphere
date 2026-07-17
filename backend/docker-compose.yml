@@ -12,4 +12,17 @@ services:
     env_file:
       - .env
 
+    depends_on:
+      - redis
+
     restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+
+    container_name: shopsphere-redis
+
+    restart: unless-stopped
+
+    ports:
+      - "6379:6379"

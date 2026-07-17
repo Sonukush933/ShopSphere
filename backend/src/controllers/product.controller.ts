@@ -1,3 +1,10 @@
+import {
+  getCache,
+  setCache,
+  deleteCache,
+  deleteCacheByPattern,
+} from '../services/cache.service';
+import { CACHE_KEYS } from '../utils/cacheKeys';
 import { uploadOnCloudinary, deleteFromCloudinary } from '../utils/cloudinary';
 import { Express } from 'express';
 import { Request, Response } from 'express';
@@ -66,6 +73,11 @@ export const createProduct = asyncHandler(
       createdBy: req.user?._id,
     });
 
+    // ✅ Clear all product cache
+    await deleteCacheByPattern('products:*');
+
+    console.log('🗑 Product cache cleared after CREATE');
+
     return res
       .status(201)
       .json(new ApiResponse(201, product, 'Product created successfully'));
@@ -86,6 +98,26 @@ export const getAllProducts = asyncHandler(
       page = '1',
       limit = '10',
     } = req.query;
+
+    const cacheKey = CACHE_KEYS.PRODUCTS(req.query);
+
+    const cachedProducts = await getCache(cacheKey);
+
+    if (cachedProducts) {
+      console.log('🟢 Cache HIT');
+
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(
+            200,
+            cachedProducts,
+            'Products fetched from Redis Cache',
+          ),
+        );
+    }
+
+    console.log('🟡 Cache MISS');
 
     const filter: any = {};
 
@@ -169,27 +201,50 @@ export const getAllProducts = asyncHandler(
       .skip((currentPage - 1) * perPage)
       .limit(perPage);
 
-    return res.status(200).json(
-      new ApiResponse(
-        200,
-        {
-          products,
-          pagination: {
-            totalProducts,
-            currentPage,
-            totalPages: Math.ceil(totalProducts / perPage),
-            limit: perPage,
-          },
-        },
-        'Products fetched successfully',
-      ),
-    );
+    const responseData = {
+      products,
+      pagination: {
+        totalProducts,
+        currentPage,
+        totalPages: Math.ceil(totalProducts / perPage),
+        limit: perPage,
+      },
+    };
+
+    await setCache(cacheKey, responseData, 300);
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, responseData, 'Products fetched successfully'),
+      );
   },
 );
 
 export const getProductById = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
+
+    const cacheKey = CACHE_KEYS.PRODUCT_BY_ID(id);
+
+    const cachedProduct = await getCache(cacheKey);
+
+    if (cachedProduct) {
+      console.log('🟢 Product Cache HIT');
+
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(
+            200,
+            cachedProduct,
+            'Product fetched from Redis Cache',
+          ),
+        );
+    }
+
+    console.log('🟡 Product Cache MISS');
+
     const product = await Product.findById(id)
       .populate('category', 'name slug')
       .populate('createdBy', 'name email');
@@ -197,6 +252,9 @@ export const getProductById = asyncHandler(
     if (!product) {
       throw new ApiError(404, 'Product not found');
     }
+
+    // ✅ Save product in Redis for 5 minutes
+    await setCache(cacheKey, product, 300);
 
     return res
       .status(200)
@@ -272,6 +330,12 @@ export const updateProduct = asyncHandler(
 
     await product.save();
 
+    // ✅ Clear all product cache
+    await deleteCacheByPattern('products:*');
+    await deleteCache(CACHE_KEYS.PRODUCT_BY_ID(product._id.toString()));
+
+    console.log('🗑 Product cache cleared after UPDATE');
+
     return res
       .status(200)
       .json(new ApiResponse(200, product, 'Product updated successfully'));
@@ -281,11 +345,18 @@ export const updateProduct = asyncHandler(
 export const deleteProduct = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
+
     const product = await Product.findByIdAndDelete(id);
 
     if (!product) {
       throw new ApiError(404, 'Product not found');
     }
+
+    // ✅ Clear all product-related cache
+    await deleteCacheByPattern('products:*');
+    await deleteCache(CACHE_KEYS.PRODUCT_BY_ID(id));
+
+    console.log('🗑 Product cache cleared after DELETE');
 
     return res
       .status(200)
