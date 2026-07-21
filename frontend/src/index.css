@@ -1,0 +1,75 @@
+@import "tailwindcss";
+@theme {
+    /* ===============================
+     Fonts
+  =============================== */
+    --font-primary: "Inter", sans-serif;
+    /* ===============================
+     Brand Colors
+  =============================== */
+    --color-primary: #0054F0;
+    --color-primary-hover: #1d4ed8;
+    /* ===============================
+     Background
+  =============================== */
+    --color-background: #ffffff;
+    --color-surface: #f8fafc;
+    /* ===============================
+     Text
+  =============================== */
+    --color-heading: #021D47;
+    --color-body: #4D4D4D;
+    --color-muted: #E5E5E5;
+    /* ===============================
+     Border
+  =============================== */
+    --color-border: #e5e7eb;
+    /* ===============================
+     Status
+  =============================== */
+    --color-success: #22c55e;
+    --color-warning: #f59e0b;
+    --color-danger: #ef4444;
+    /* ===============================
+     Radius
+  =============================== */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    /* ===============================
+     Shadow
+  =============================== */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.12);
+    /* ===============================
+     Container
+  =============================== */
+    --container-width: 1440px;
+}
+
+@layer base {
+    * {
+        @apply m-0 box-border p-0;
+    }
+    html {
+        scroll-behavior: smooth;
+    }
+    body {
+        @apply bg-background text-body font-primary;
+    }
+    a {
+        @apply no-underline text-inherit;
+    }
+    img {
+        @apply block max-w-full;
+    }
+    button {
+        @apply cursor-pointer;
+    }
+    ul,
+    ol {
+        @apply list-none;
+    }
+}
