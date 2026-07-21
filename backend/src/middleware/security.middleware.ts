@@ -1,3 +1,4 @@
+import cors from "cors";
 import { Express } from 'express';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -7,6 +8,13 @@ import hpp from 'hpp';
 
 export const applySecurityMiddleware = (app: Express) => {
   app.use(helmet());
+  
+  app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 
   app.use(compression());
 

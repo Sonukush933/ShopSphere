@@ -1,6 +1,5 @@
-import type { User } from "../../types/auth.types";
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { User } from '../../types/auth.types';
 
 interface AuthState {
   user: User | null;
@@ -15,22 +14,22 @@ const initialState: AuthState = {
 };
 
 const authSlice = createSlice({
-  name: "auth",
+  name: 'auth',
   initialState,
   reducers: {
-    login(
+    login: (
       state,
       action: PayloadAction<{
         user: User;
         accessToken: string;
-      }>
-    ) {
+      }>,
+    ) => {
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
       state.isAuthenticated = true;
     },
 
-    logout(state) {
+    logout: (state) => {
       state.user = null;
       state.accessToken = null;
       state.isAuthenticated = false;

@@ -4,7 +4,7 @@ export const api = createApi({
   reducerPath: "api",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5000/api/v1",
+    baseUrl: "http://localhost:5000/api",
   }),
 
   tagTypes: [],

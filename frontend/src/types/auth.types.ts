@@ -2,7 +2,7 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  role: "user" | "admin";
+  role: "customer" | "admin";
 }
 
 export interface LoginRequest {
@@ -17,4 +17,8 @@ export interface LoginResponse {
     user: User;
     accessToken: string;
   };
+}
+export interface LoginFormInputs {
+  email: string;
+  password: string;
 }
