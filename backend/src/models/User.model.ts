@@ -1,7 +1,7 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { USER_ROLES } from '../constants';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import mongoose, { Document, Schema } from 'mongoose';
+import { USER_ROLES } from '../constants';
 
 export interface IUser extends Document {
   name: string;

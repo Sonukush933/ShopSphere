@@ -6,6 +6,7 @@ import {
   getCurrentUser,
   loginUser,
   logoutUser,
+  refreshAccessToken,
   registerUser,
 } from '../controllers/auth.controller';
 
@@ -104,5 +105,10 @@ router.get('/me', verifyJWT, getCurrentUser);
  *         description: Logout successful
  */
 router.post('/logout', verifyJWT, logoutUser);
+
+
+router.post("/refresh", refreshAccessToken);
+
+
 
 export default router;

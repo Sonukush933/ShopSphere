@@ -14,19 +14,36 @@ export const verifyJWT = asyncHandler(
       throw new ApiError(401, 'Unauthorized request');
     }
 
-    const decodedToken = jwt.verify(
-      token,
-      process.env.JWT_ACCESS_SECRET as string,
-    );
+    // 👇 Declare decodedToken
+    let decodedToken: jwt.JwtPayload;
 
-    const user = await User.findById(
-      (decodedToken as jwt.JwtPayload)._id,
-    ).select('-password -refreshToken');
+    try {
+      decodedToken = jwt.verify(
+        token,
+        process.env.JWT_ACCESS_SECRET as string,
+      ) as jwt.JwtPayload;
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new ApiError(401, 'Access token expired');
+      }
+
+      if (error instanceof jwt.JsonWebTokenError) {
+        throw new ApiError(401, 'Invalid access token');
+      }
+
+      throw new ApiError(401, 'Unauthorized request');
+    }
+
+    const user = await User.findById(decodedToken._id).select(
+      '-password -refreshToken',
+    );
 
     if (!user) {
       throw new ApiError(401, 'Invalid Access Token');
     }
-    (req as Request & { user?: typeof user }).user = user;
+
+    req.user = user;
+
     next();
   },
 );

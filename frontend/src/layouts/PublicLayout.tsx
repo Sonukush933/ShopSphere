@@ -1,15 +1,28 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { logout } from '../features/auth/authSlice';
+import { useLogoutMutation } from '../services/authApi';
+import { api } from '../services/api';
 
 function PublicLayout() {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-
+  const dispatch = useAppDispatch();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+ 
+  const [logoutUser] = useLogoutMutation();
 
-  function handleLogout() {
-    dispatch(logout());
+  async function handleLogout() {
+    try {
+      await logoutUser().unwrap();
+
+      dispatch(logout());
+
+      dispatch(api.util.resetApiState());
+
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   }
 
   return (

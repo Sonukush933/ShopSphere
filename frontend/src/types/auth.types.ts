@@ -22,3 +22,17 @@ export interface LoginFormInputs {
   email: string;
   password: string;
 }
+
+export interface MeResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: User;
+}
+
+export interface LogoutResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: {};
+}
