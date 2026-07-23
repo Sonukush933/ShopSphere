@@ -1,57 +1,19 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { logout } from '../features/auth/authSlice';
-import { useLogoutMutation } from '../services/authApi';
-import { api } from '../services/api';
+import { Outlet } from "react-router-dom";
+import Navbar from "../components/layout/Navbar";
+import TopBar from "../components/layout/TopBar";
+
 
 function PublicLayout() {
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
- 
-  const [logoutUser] = useLogoutMutation();
-
-  async function handleLogout() {
-    try {
-      await logoutUser().unwrap();
-
-      dispatch(logout());
-
-      dispatch(api.util.resetApiState());
-
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  }
-
   return (
-    <main className="min-h-screen">
-      <header className="flex items-center justify-between border-b p-4">
-        <nav className="flex gap-6">
-          <NavLink to="/">Home</NavLink>
-          <NavLink to="/products">Products</NavLink>
-        </nav>
+   <main className="min-h-screen bg-background">
+  <TopBar />
 
-        <div className="flex items-center gap-4">
-          {isAuthenticated && user && <span>Hi, {user.name}</span>}
+  <Navbar />
 
-          {isAuthenticated ? (
-            <button onClick={handleLogout}>Logout</button>
-          ) : (
-            <button onClick={() => navigate('/login')}>Login</button>
-          )}
-        </div>
-      </header>
+  <Outlet />
 
-      <section className="p-10">
-        <Outlet />
-      </section>
 
-      <footer className="bg-gray-900 p-5 text-center text-white">
-        ShopSphere Footer
-      </footer>
-    </main>
+</main>
   );
 }
 

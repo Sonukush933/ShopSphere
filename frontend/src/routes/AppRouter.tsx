@@ -6,6 +6,8 @@ import LoginPage from '../pages/auth/LoginPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 import ProfilePage from '../pages/ProfilePage';
 import AdminPage from '../pages/AdminPage';
+import NotFoundPage from '../pages/public/NotFoundPage';
+import OrdersPage from '../pages/OrdersPage';
 
 const router = createBrowserRouter([
   {
@@ -26,6 +28,14 @@ const router = createBrowserRouter([
         element: <ProductsPage />,
       },
       {
+        path: 'orders',
+        element: (
+          <ProtectedRoute>
+            <OrdersPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: 'profile',
         element: (
           <ProtectedRoute>
@@ -41,6 +51,11 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: '*',
+        element: <NotFoundPage />,
+      },
+      
     ],
   },
 ]);
