@@ -73,3 +73,28 @@
         @apply list-none;
     }
 }
+
+
+/* Hide Horizontal Scrollbar */
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+@keyframes feature-marquee {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+.animate-feature-marquee {
+    animation: feature-marquee 18s linear infinite;
+}

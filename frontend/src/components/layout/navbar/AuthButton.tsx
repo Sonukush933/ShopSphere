@@ -78,19 +78,19 @@ function AuthButton({ mobile = false }: AuthButtonProps) {
         <div className="text-right leading-tight">
           {isAuthenticated && user ? (
             <>
-              <p className={mobile ? 'text-[12px]' : 'text-[14px]'}>Hi,</p>
+              <p className={mobile ? 'text-[12px]' : 'text-[12px]'}>Hi,</p>
 
               <p
                 className={
-                  mobile ? 'text-[14px] font-medium' : 'text-[16px] font-medium'
+                  mobile ? 'text-[12px] font-medium' : 'text-[16px] font-medium'
                 }
               >
-                {user.name}
+                {user.name.split(" ")[0]}
               </p>
             </>
           ) : (
             <>
-              <p className={mobile ? 'text-[12px]' : 'text-[12px]'}>
+              <p className={mobile ? 'text-[12px]' : 'text-[14px]'}>
                 Sign Up Now
               </p>
 

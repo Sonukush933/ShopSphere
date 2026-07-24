@@ -1,9 +1,14 @@
+import CategoryNavigation from "../../components/home/CategoryNavigation";
+import HeroSection from "../../components/home/HeroSection";
+import ServiceHighlights from "../../components/home/ServiceHighlights";
 
 
 function HomePage() {
   return (
     <>
-   <h1></h1>
+     <CategoryNavigation />
+     <HeroSection/>
+     <ServiceHighlights/>
     </>
   );
 }
